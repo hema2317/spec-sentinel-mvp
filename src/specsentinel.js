@@ -1,4 +1,4 @@
-// src/spec-sentinel.js
+// src/specsentinel.js
 const fs = require('fs');
 const path = require('path');
 
@@ -21,8 +21,12 @@ Status: ✅ Workflow connected and report generated.
 > This is a placeholder MVP report. We will later add real checks here.
 `;
 
-// Write file
-const outPath = path.join(reportsDir, 'spec-report.md');
-fs.writeFileSync(outPath, content, 'utf8');
-
-console.log(`Wrote report to ${outPath}`);
+try {
+  const outPath = path.join(reportsDir, 'spec-report.md');
+  fs.writeFileSync(outPath, content, 'utf8');
+  console.log(`Report written to ${outPath}`);
+  process.exit(0);
+} catch (err) {
+  console.error('Failed to write report:', err);
+  process.exit(1);
+}
