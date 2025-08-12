@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "spec:check": "node src/specsentinel.js"
+    "spec:check": "node src/specsentinel.cjs"
   },
   "dependencies": {}
 }
