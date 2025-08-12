@@ -1,0 +1,57 @@
+name: Spec Sentinel
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  spec-sentinel:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # we need history to diff base vs head
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # Extract SPEC_ID from branch name like: feature/JIRA-123-checkout
+      - name: Detect SPEC_ID from branch
+        id: detect
+        run: |
+          REF="${{ github.head_ref }}"
+          # find first token like ABC-123 plus optional suffix (e.g. JIRA-123-checkout)
+          if [[ "$REF" =~ ([A-Z]+-[0-9]+[-a-zA-Z0-9]*) ]]; then
+            echo "SPEC_ID=${BASH_REMATCH[1]}" >> $GITHUB_ENV
+          else
+            echo "SPEC_ID=JIRA-123-checkout" >> $GITHUB_ENV
+          fi
+          echo "BASE_REF=${{ github.base_ref }}" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Run Spec Sentinel
+        run: npm run spec:check
+        env:
+          SPEC_ID: ${{ env.SPEC_ID }}
+          BASE_REF: ${{ env.BASE_REF }}
+
+      - name: Upload report (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: spec-report
+          path: reports/spec-report.md
+
+      - name: Comment report on PR
+        if: ${{ github.event_name == 'pull_request' && always() }}
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          filePath: reports/spec-report.md
