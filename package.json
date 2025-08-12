@@ -1,0 +1,10 @@
+{
+  "name": "spec-sentinel-mvp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "spec:check": "node src/specsentinel.js"
+  },
+  "dependencies": {}
+}
